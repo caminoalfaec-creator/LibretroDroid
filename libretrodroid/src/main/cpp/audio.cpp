@@ -18,6 +18,7 @@
 #include "log.h"
 
 #include "audio.h"
+#include <algorithm>
 #include <cmath>
 #include <memory>
 
@@ -105,6 +106,10 @@ void Audio::setPlaybackSpeed(const double newPlaybackSpeed) {
     playbackSpeed = newPlaybackSpeed;
 }
 
+void Audio::setVolume(float newVolume) {
+    volume = std::min(std::max(newVolume, 0.0f), 1.0f);
+}
+
 oboe::DataCallbackResult Audio::onAudioReady(oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) {
     double dynamicBufferFactor = computeDynamicBufferConversionFactor(0.001 * numFrames);
     double finalConversionFactor = baseConversionFactor * dynamicBufferFactor * playbackSpeed;
@@ -119,6 +124,13 @@ oboe::DataCallbackResult Audio::onAudioReady(oboe::AudioStream *oboeStream, void
 
     auto outputArray = reinterpret_cast<int16_t *>(audioData);
     resampler.resample(temporaryAudioBuffer.get(), currentFramesToSubmit, outputArray, numFrames);
+
+    float currentVolume = volume;
+    if (currentVolume < 1.0f) {
+        for (int32_t i = 0; i < numFrames * 2; i++) {
+            outputArray[i] = (int16_t) (outputArray[i] * currentVolume);
+        }
+    }
 
     latencyTuner->tune();
 

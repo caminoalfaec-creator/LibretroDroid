@@ -515,6 +515,13 @@ void LibretroDroid::setAudioEnabled(bool enabled) {
     audioEnabled = enabled;
 }
 
+void LibretroDroid::setAudioVolume(float volume) {
+    audioVolume = volume;
+    if (audio) {
+        audio->setVolume(audioVolume);
+    }
+}
+
 void LibretroDroid::setShaderConfig(ShaderManager::Config shaderConfig) {
     fragmentShaderConfig = std::move(shaderConfig);
     if (video) {
@@ -613,6 +620,7 @@ void LibretroDroid::afterGameLoad() {
         system_av_info.timing.fps,
         preferLowLatencyAudio
     );
+    audio->setVolume(audioVolume);
 
     updateAudioSampleRateMultiplier();
 

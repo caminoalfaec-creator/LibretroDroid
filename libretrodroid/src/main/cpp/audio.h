@@ -19,6 +19,7 @@
 #define LIBRETRODROID_AUDIO_H
 
 #include <array>
+#include <atomic>
 #include <unistd.h>
 #include <oboe/Oboe.h>
 #include <oboe/FifoBuffer.h>
@@ -55,6 +56,7 @@ public:
 public:
     void write(const int16_t *data, size_t frames);
     void setPlaybackSpeed(const double newPlaybackSpeed);
+    void setVolume(float newVolume);
 
 private:
     static int32_t roundToEven(int32_t x);
@@ -69,6 +71,8 @@ private:
     const double ki = 0.00002;
     const double maxp = 0.003;
     const double maxi = 0.02;
+
+    std::atomic<float> volume { 1.0f };
 
     LinearResampler resampler;
     std::unique_ptr<oboe::FifoBuffer> fifoBuffer = nullptr;
